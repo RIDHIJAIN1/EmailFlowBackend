@@ -98,6 +98,9 @@ const start = async (req, res) => {
       const { project } = job.attrs.data;
 
       const sequences = project.sequence.sequences;
+      if(!sequences){
+        throw new Error("Sequence not found")
+      }
       const lists = project.sequence.lists;
 
       let delay = 1; // Default delay of 1hr
@@ -154,7 +157,9 @@ const start = async (req, res) => {
     if (!project) return sendError(res, "Project not found", null, 404);
 
     await agenda.start();
-    await agenda.schedule(new Date(), "send scheduled email", { project });
+    const oneHourFromNow = new Date(Date.now() + 60 * 60 * 1000);
+await agenda.schedule(oneHourFromNow, "send scheduled email", { project });
+  
 
     agenda.on("start", (job) => {
       console.log(`Job ${job.attrs.name} starting`);
