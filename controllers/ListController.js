@@ -18,9 +18,12 @@ const createList = async (req, res) => {
     let fileData = [];
     
     readableStream
-      .pipe(csvParser())
+      .pipe(csvParser({
+        mapHeaders: ({ header }) => header.trim().toLowerCase() // Clean and standardize headers
+      }))
       .on('data', (row) => {
         fileData.push(row); // Add CSV data to the array
+        console.log(row);
       })
       .on('end', async () => {
         // Validate that each row contains the required fields
@@ -29,7 +32,7 @@ const createList = async (req, res) => {
         );
 
         if (missingFields.length > 0) {
-          return sendError(res, 'Some entries are missing required fields: email, first_name, last_name', missingFields);
+          return sendError(res, 'Some entries are missing required fields: ', missingFields);
         }
 
         // Save the parsed data to the database
